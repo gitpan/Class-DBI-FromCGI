@@ -3,7 +3,12 @@
 use strict;
 
 use CGI::Untaint;
-use Test::More tests => 77;
+use Test::More;
+
+BEGIN {
+  eval "use DBD::SQLite";
+  plan $@ ? (skip_all => 'needs DBD::SQLite for testing') : (tests => 77);
+}
 
 #-------------------------------------------------------------------------
 
@@ -11,11 +16,13 @@ package Water;
 
 use base 'Class::DBI';
 use Class::DBI::FromCGI;
-use File::Temp qw/tempdir/;
 
-my $dir = tempdir( CLEANUP => 1 );
+use File::Temp qw/tempfile/;
+my (undef, $DB) = tempfile();
+my @DSN = ("dbi:SQLite:dbname=$DB", '', '', { AutoCommit => 1 });
+END { unlink $DB if -e $DB }
 
-__PACKAGE__->set_db('Main', "DBI:CSV:f_dir=$dir", '', '');
+__PACKAGE__->set_db(Main => @DSN);
 __PACKAGE__->table('Water');
 __PACKAGE__->columns(Primary => 'id');
 __PACKAGE__->columns(Other   => qw/title count wibble/);
@@ -106,7 +113,7 @@ my %args = (
   ok !$hoker->cgi_update_errors, "No error";
   is $hoker->$_(), $args{$_}, "$_ changed" foreach qw/title/;
   isnt $hoker->$_(), $args{$_}, "$_ not changed" foreach qw/count wibble/;
-  $hoker->commit;
+  $hoker->update;
 }
 
 { # Ignore some
@@ -117,7 +124,7 @@ my %args = (
   ok !$hoker->cgi_update_errors, "No error";
   is $hoker->$_(), $args{$_}, "$_ changed" foreach qw/count wibble/;
   isnt $hoker->$_(), $args{$_}, "$_ not changed" foreach qw/title/;
-  $hoker->commit;
+  $hoker->update;
 }
 
 { # Update all
@@ -127,7 +134,7 @@ my %args = (
   ok $hoker->update_from_cgi($h), "Can update";
   ok !$hoker->cgi_update_errors, "No error";
   is $hoker->$_(), $args{$_}, "$_ changed" foreach qw/title count wibble/;
-  $hoker->commit;
+  $hoker->update;
 }
 
 { # Create

@@ -1,5 +1,14 @@
 Revision history 
 
+0.94  Tue Apr  8 2003
+        - Update using Class::DBI's set() method so that constraints can
+          check values of other columns (Thanks to Mark Hughes)
+
+0.93  Fri Mar 14 2003
+        - Upgrade to Class::DBI 0.91 (using deprecated methods)
+        - Change dependency to DBD::SQLite
+
+
 0.92  Wed Nov 27 2002
         - Upgrade to Class::DBI 0.90 (using deprecated methods)
 

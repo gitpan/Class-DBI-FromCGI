@@ -1,6 +1,6 @@
 package Class::DBI::FromCGI;
 
-$VERSION = 0.92;
+$VERSION = 0.94;
 
 =head1 NAME
 
@@ -230,7 +230,7 @@ sub run_update {
   ($them, $to_update) = $me->validate($them, $h, \@wanted, [$them->primary_column]);
 
   return if $them->cgi_update_errors;
-  $them->$_($to_update->{$_}) foreach keys %$to_update;
+	$them->set(%$to_update);
   return 1;
 }
 
