@@ -85,6 +85,13 @@ In fact, this is the behaviour if you don't pass it any columns at all,
 and just do:
   $obj->update_from_cgi($h);
 
+=head1 ANOTHER NOTE
+
+If you haven't set up any 'untaint_column' information for a column which
+you later attempt to untaint, then we try to call $self->column_type to
+ascertain the default handler to use. Currently this will only use if
+you're using Class::DBI::mysql, and only for certain column types.
+
 =head1 SEE ALSO
 
 L<Class::DBI>. L<CGI::Untaint>. L<Template>.
@@ -109,15 +116,15 @@ it under the same terms as Perl itself.
 
 use strict;
 use vars qw/$VERSION/;
-$VERSION = 0.04;
+$VERSION = 0.05;
 
 use strict;
 use Exporter;
 
 use vars qw/@ISA @EXPORT/;
 use base 'Exporter';
-@EXPORT = qw/update_from_cgi untaint_columns _untaint_handlers
-             cgi_update_errors/;
+@EXPORT = qw/update_from_cgi untaint_columns __untaint_handlers
+             cgi_update_errors __cgi_handler_for/;
 
 sub untaint_columns {
   my ($class, %args) = @_;
@@ -134,15 +141,14 @@ sub update_from_cgi {
   my ($self, $h, @wanted) = @_;
   my $class = ref($self) 
     or die "update_from_form cannot be called as a class method";
-  my %handler = $class->_untaint_handlers;
   my %to_update;
   $self->{_cgi_update_error} = {};
   my %pri = map { $_ => 1 } $class->columns('Primary');
   @wanted = $class->columns('All') unless @wanted;
   foreach my $field (@wanted) {
     next if $pri{$field};
-    die "Don't know how to untaint $field" unless $handler{$field};
-    my $value = $h->extract("-as_$handler{$field}" => $field);
+    my $type = $self->__cgi_handler_for($field);
+    my $value = $h->extract("-as_$type" => $field);
     if (my $err = $h->error) {
       $self->{_cgi_update_error}->{$field} = $err
     } else {
@@ -156,13 +162,43 @@ sub update_from_cgi {
 
 sub cgi_update_errors { %{shift->{_cgi_update_error}} }
 
-sub _untaint_handlers { 
-  my $class = shift;
-  die "untaint_columns not set up for $class"
-    unless $class->can('__untaint_types');
+sub __untaint_handlers { 
+  my $me = shift;
+  my $class = ref($me) || $me;
+  return () unless $class->can('__untaint_types');
   my %type = %{$class->__untaint_types || {}};
   my %h; @h{@{$type{$_}}} = ($_) x @{$type{$_}} foreach keys %type;
   return %h;
+}
+
+sub __cgi_handler_for {
+  my ($self, $field) = @_;
+  my %handler = $self->__untaint_handlers;
+  return $handler{$field} if $handler{$field};
+  my $handler = eval {
+    my $type = $self->column_type($field) or die;
+    __PACKAGE__->column_type_for($type);
+  };
+  return $handler if $handler;
+  die "Don't know how to untaint $field";
+}
+
+sub column_type_for {
+  my $self = shift;
+  my $type = lc shift;
+     $type =~ s/\(.*//;
+  my %map = (
+    varchar   => 'printable', 
+    char      => 'printable', 
+    tinyint   => 'integer', 
+    smallint  => 'integer', 
+    mediumint => 'integer',
+    int       => 'integer', 
+    bigint    => 'integer', 
+    date      => 'date',
+    year      => 'integer',
+  );
+  return $map{$type} || "";
 }
 
 1;

@@ -1,6 +1,10 @@
 Revision history 
 
 
+0.05  Fri Nov  9 2001
+        - Attempts to set default untaint patterns based on DB schema
+          if used with Class::DBI::mysql
+
 0.04  Wed Nov  7 2001
         - auto-skips primary key
         - defaults to $obj->columns('All') where none specified
