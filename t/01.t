@@ -3,7 +3,7 @@
 use strict;
 
 use CGI::Untaint;
-use Test::More tests => 25;
+use Test::More tests => 31;
 
 #-------------------------------------------------------------------------
 
@@ -55,7 +55,7 @@ my %args = (
   local $args{count} = "Foo";
   my $h = CGI::Untaint->new(%args);
   isa_ok $h => 'CGI::Untaint';
-  ok !$hoker->update_from_cgi($h => qw/title count wibble/), "Update fails";
+  ok !$hoker->update_from_cgi($h), "Update fails";
   ok my %error = $hoker->cgi_update_errors, "We have errors";
   ok $error{count}, "With count: $error{count}";
   ok !$error{title}, "But not with title";
@@ -68,7 +68,7 @@ my %args = (
   local $args{wibble} = "Bar";
   my $h = CGI::Untaint->new(%args);
   isa_ok $h => 'CGI::Untaint';
-  ok !$hoker->update_from_cgi($h => qw/title count wibble/), "Update fails";
+  ok !$hoker->update_from_cgi($h), "Update fails";
   ok my %error = $hoker->cgi_update_errors, "We have errors";
   ok $error{count}, "With count: $error{count}";
   ok $error{wibble}, "And wibble: $error{wibble}";
@@ -76,10 +76,21 @@ my %args = (
   is $hoker->$_(), $orig{$_}, "$_ unchanged" foreach qw/title count wibble/;
 }
 
-{ # Test everything OK
+{ # Only update some columns
   my $h = CGI::Untaint->new(%args);
   isa_ok $h => 'CGI::Untaint';
-  ok $hoker->update_from_cgi($h => qw/title count wibble/), "Can update";
+  ok $hoker->update_from_cgi($h => 'title'), "Can update";
+  ok !$hoker->cgi_update_errors, "No error";
+  is $hoker->$_(), $args{$_}, "$_ changed" foreach qw/title/;
+  isnt $hoker->$_(), $args{$_}, "$_ not changed" foreach qw/count wibble/;
+  $hoker->commit;
+}
+
+{ # Update all
+  local $args{title} = "Hoke it out";
+  my $h = CGI::Untaint->new(%args);
+  isa_ok $h => 'CGI::Untaint';
+  ok $hoker->update_from_cgi($h), "Can update";
   ok !$hoker->cgi_update_errors, "No error";
   is $hoker->$_(), $args{$_}, "$_ changed" foreach qw/title count wibble/;
   $hoker->commit;

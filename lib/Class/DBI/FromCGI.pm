@@ -70,12 +70,20 @@ else with it). Otherwise the update will fail (there are no partial
 updates), and $obj->cgi_update_errors will tell you what went wrong
 (as a hash of problem field => error from CGI::Untaint).
 
-Doesn't that make your life so much easier.
+Doesn't that make your life so much easier?
 
-=head1 CAVEATS
+=head1 NOTE
 
 Don't try to update the value of your primary key. Class::DBI doesn't
-like that.  I should probably make this complain if you try to do that.
+like that. If you try to do this it will be silently skipped.
+
+Note that this means, on the other hand, that you can do:
+  
+  $obj->update_from_cgi($h => $obj->columns('All'));
+
+In fact, this is the behaviour if you don't pass it any columns at all,
+and just do:
+  $obj->update_from_cgi($h);
 
 =head1 SEE ALSO
 
@@ -101,7 +109,7 @@ it under the same terms as Perl itself.
 
 use strict;
 use vars qw/$VERSION/;
-$VERSION = 0.03;
+$VERSION = 0.04;
 
 use strict;
 use Exporter;
@@ -129,7 +137,10 @@ sub update_from_cgi {
   my %handler = $class->_untaint_handlers;
   my %to_update;
   $self->{_cgi_update_error} = {};
+  my %pri = map { $_ => 1 } $class->columns('Primary');
+  @wanted = $class->columns('All') unless @wanted;
   foreach my $field (@wanted) {
+    next if $pri{$field};
     die "Don't know how to untaint $field" unless $handler{$field};
     my $value = $h->extract("-as_$handler{$field}" => $field);
     if (my $err = $h->error) {

@@ -1,8 +1,13 @@
 Revision history 
 
 
+0.04  Wed Nov  7 2001
+        - auto-skips primary key
+        - defaults to $obj->columns('All') where none specified
+
 0.03  Thu Nov  1 2001
         - removed framework-specific behavior so can stand alone 
+        - First CPAN release
 
 0.02  Fri Oct 15 2001
 	- allow untaint_columns to take many pairs, instead of just one 
