@@ -1,5 +1,7 @@
 Revision history 
 
+0.06  Mon Dec 17 2001
+        - Auto-detect 'text' fields with mysql also
 
 0.05  Fri Nov  9 2001
         - Attempts to set default untaint patterns based on DB schema

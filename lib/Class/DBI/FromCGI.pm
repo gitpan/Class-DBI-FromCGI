@@ -116,7 +116,7 @@ it under the same terms as Perl itself.
 
 use strict;
 use vars qw/$VERSION/;
-$VERSION = 0.05;
+$VERSION = 0.06;
 
 use strict;
 use Exporter;
@@ -130,11 +130,11 @@ sub untaint_columns {
   my ($class, %args) = @_;
   $class->mk_classdata('__untaint_types')
     unless $class->can('__untaint_types');
+  my %types = %{$class->__untaint_types || {}};
   while (my($type, $ref) = each(%args)) {
-    my %types = %{$class->__untaint_types || {}};
        $types{$type} = $ref;
-    $class->__untaint_types(\%types);
   }
+  $class->__untaint_types(\%types);
 }
 
 sub update_from_cgi {
@@ -190,6 +190,7 @@ sub column_type_for {
   my %map = (
     varchar   => 'printable', 
     char      => 'printable', 
+    text      => 'printable', 
     tinyint   => 'integer', 
     smallint  => 'integer', 
     mediumint => 'integer',
