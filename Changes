@@ -1,5 +1,15 @@
 Revision history 
 
+0.9   Mon Feb 25 2002
+        - added 'create_from_cgi' method
+
+0.8   Sat Feb 23 2002
+        - Can now ask what the untaint type for a given column would be
+
+0.07  Sun Dec 23 2001
+        - Can now specify fields which must be filled, and fields which
+          should be ignored.
+
 0.06  Mon Dec 17 2001
         - Auto-detect 'text' fields with mysql also
 
@@ -16,7 +26,7 @@ Revision history
         - First CPAN release
 
 0.02  Fri Oct 15 2001
-	- allow untaint_columns to take many pairs, instead of just one 
+	      - allow untaint_columns to take many pairs, instead of just one 
 
 0.01  Sun Sep 23 2001
         - original version
