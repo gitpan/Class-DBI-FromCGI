@@ -6,8 +6,8 @@ WriteMakefile(
     NAME          => 'Class::DBI::FromCGI',
     VERSION_FROM  => $me, 
     PREREQ_PM     => { 
-      'Class::DBI'   => 0,
-      'CGI::Untaint' => 0,
+      'Class::DBI'   => 0.90,
+      'CGI::Untaint' => 0.8,
       'Test::More'   => '0.17',
     },
     ($] < 5.005 ? () : (

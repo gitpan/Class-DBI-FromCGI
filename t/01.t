@@ -3,7 +3,7 @@
 use strict;
 
 use CGI::Untaint;
-use Test::More tests => 72;
+use Test::More tests => 77;
 
 #-------------------------------------------------------------------------
 
@@ -142,6 +142,18 @@ my %args = (
   my $id = $new->id;
   my $fetch = Water->retrieve($id);
   isa_ok $new, 'Water', "It was stored";
+}
+
+{ # OK Create - missing args
+  my %args = %args;
+  $args{id} = 404;
+  delete $args{title};
+  my $h = CGI::Untaint->new(%args);
+  isa_ok $h => 'CGI::Untaint', "(Missing args create)";
+  my $new = Water->create_from_cgi($h);
+  isa_ok $new, 'Water';
+  ok !$new->cgi_update_errors, "No errors";
+  is $new->$_(), $args{$_}, "$_ changed" foreach qw/count wibble/;
 }
 
 { # Failed Create

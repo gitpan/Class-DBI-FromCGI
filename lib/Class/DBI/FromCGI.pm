@@ -1,6 +1,6 @@
 package Class::DBI::FromCGI;
 
-$VERSION = 0.9;
+$VERSION = 0.92;
 
 =head1 NAME
 
@@ -185,6 +185,7 @@ sub untaint_type {
   my %handler = __PACKAGE__->untaint_handlers($class);
   return $handler{$field} if $handler{$field};
   my $handler = eval {
+		local $SIG{__WARN__} = sub {};
     my $type =  $class->column_type($field) or die;
     column_type_for($type);
   };
@@ -208,10 +209,12 @@ sub validate {
     next if $seen{$field}++;
     my $type = $them->untaint_type($field) or next;
     my $value = $h->extract("-as_$type" => $field);
-    if (my $err = $h->error) {
-      $them->{_cgi_update_error}->{$field} = $err
-    } elsif ($required{$field} and not $value) {
+    my $err = $h->error;
+    if ($required{$field} and not $value) {
       $them->{_cgi_update_error}->{$field} = "You must supply '$field'"
+    } elsif ($err) {
+      $them->{_cgi_update_error}->{$field} = $err
+        unless $err =~ /^No parameter for/;
     } else {
       $fields->{$field} = $value
     }
@@ -224,7 +227,7 @@ sub run_update {
   my $class = ref($them);
 
   my $to_update;
-  ($them, $to_update) = $me->validate($them, $h, \@wanted, [$them->primary]);
+  ($them, $to_update) = $me->validate($them, $h, \@wanted, [$them->primary_column]);
 
   return if $them->cgi_update_errors;
   $them->$_($to_update->{$_}) foreach keys %$to_update;

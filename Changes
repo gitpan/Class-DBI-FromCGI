@@ -1,5 +1,12 @@
 Revision history 
 
+0.92  Wed Nov 27 2002
+        - Upgrade to Class::DBI 0.90 (using deprecated methods)
+
+0.91  Wed Mar 06 2002
+        - cope with case of not required field not being receieved at all
+          (as opposed to not untainting correctly)
+
 0.9   Mon Feb 25 2002
         - added 'create_from_cgi' method
 
