@@ -1,0 +1,12 @@
+Revision history 
+
+
+0.03  Thu Nov  1 2001
+        - removed framework-specific behavior so can stand alone 
+
+0.02  Fri Oct 15 2001
+	- allow untaint_columns to take many pairs, instead of just one 
+
+0.01  Sun Sep 23 2001
+        - original version
+

@@ -1,0 +1,5 @@
+Changes
+MANIFEST
+Makefile.PL
+lib/Class/DBI/FromCGI.pm
+t/01.t
