@@ -1,5 +1,10 @@
 Changes
-MANIFEST
-Makefile.PL
 lib/Class/DBI/FromCGI.pm
+Makefile.PL
+MANIFEST
+MANIFEST.SKIP
+README
 t/01.t
+t/pod-coverage.t
+t/pod.t
+META.yml                                 Module meta-data (added by MakeMaker)

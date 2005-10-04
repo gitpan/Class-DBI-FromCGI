@@ -1,5 +1,10 @@
 Revision history 
 
+1.00  Tue Oct  4 09:46:44 UTC 2005
+  - Fix errors in docs (Andrew McAlister, Jesse Sheidlower)
+  - Check args to untaint_columns (Dave Howorth)
+  - Add some more docs.
+
 0.94  Tue Apr  8 2003
         - Update using Class::DBI's set() method so that constraints can
           check values of other columns (Thanks to Mark Hughes)

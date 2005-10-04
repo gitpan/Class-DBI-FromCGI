@@ -7,7 +7,7 @@ use Test::More;
 
 BEGIN {
   eval "use DBD::SQLite";
-  plan $@ ? (skip_all => 'needs DBD::SQLite for testing') : (tests => 77);
+  plan $@ ? (skip_all => 'needs DBD::SQLite for testing') : (tests => 78);
 }
 
 #-------------------------------------------------------------------------
@@ -177,4 +177,13 @@ is (Water->untaint_type('title'), 'printable', "title is printable");
 is (Water->untaint_type('count'), 'integer', "count is integer");
 is (Water->untaint_type('wibble'), 'integer', "count is integer");
 is (Water->untaint_type('foo'), undef, "no type for id");
+
+eval { 
+	Water->untaint_columns({
+    printable => [qw/title/],
+    integer   => [qw/id count wibble/],
+	});
+};
+ok $@, "Can't set up untaints with hashref: $@";
+
 
